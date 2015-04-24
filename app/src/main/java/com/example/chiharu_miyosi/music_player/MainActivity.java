@@ -29,6 +29,7 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mp = null;
         mp = MediaPlayer.create(this,R.raw.good_enough);
 
         try{
@@ -57,14 +58,12 @@ public class MainActivity extends ActionBarActivity {
         wholetime.setText(m + ":" + s);
     }
 
-    @Override
     public void onStopTrackingTouch(SeekBar seekbar){
         int progress = seekbar.getProgress();
         mp.seekTo(progress);
         mp.start();
     }
 
-    @Override
     public void onStartTrackingTouch(SeekBar seekbar){
         int progress = seekbar.getProgress();
         mp.seekTo(progress);
@@ -77,7 +76,6 @@ public class MainActivity extends ActionBarActivity {
 
     public void stop(View v){
         mp.stop();
-        mp.reset();
     }
 
     public void pause(View v){
