@@ -13,6 +13,7 @@ import android.widget.TextView;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -22,7 +23,7 @@ public class MainActivity extends ActionBarActivity {
     Timer timer;
     Handler handler = new Handler();
     SeekBar seekbar;
-    TextView currenttime,wholetime;
+    TextView currenttime_t,wholetime_t;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,19 +44,19 @@ public class MainActivity extends ActionBarActivity {
         text = (TextView)findViewById(R.id.title);
         text.setText("Good Enough");
         seekbar = (SeekBar)findViewById(R.id.seekBar);
-        currenttime = (TextView)findViewById(R.id.current_time);
-        wholetime = (TextView)findViewById(R.id.whole_time);
+        currenttime_t = (TextView)findViewById(R.id.current_time);
+        wholetime_t = (TextView)findViewById(R.id.whole_time);
 
         int duration = mp.getDuration();
-        seekbar.setMax(duration);
         int duration_sec = duration / 1000;
         int current_m =  duration_sec / 60;
         int current_s = duration_sec % 60;
+        seekbar.setMax(duration);
 
         String m = String.format(Locale.JAPAN, "%02d",current_m);
         String s = String.format(Locale.JAPAN, "%02d",current_s);
 
-        wholetime.setText(m + ":" + s);
+        wholetime_t.setText(m + ":" + s);
     }
 
     public void onStopTrackingTouch(SeekBar seekbar){
@@ -72,14 +73,46 @@ public class MainActivity extends ActionBarActivity {
 
     public void start(View v){
         mp.start();
+
+        if(timer == null){
+            timer = new Timer();
+            timer.schedule(new TimerTask(){
+                @Override
+                public void run(){
+                    int duration = mp.getCurrentPosition() / 1000;
+
+                    int current_m = duration / 60;
+                    int current_s = duration % 60;
+
+                    final String m = String.format(Locale.JAPAN,"%02d",current_m);
+                    final String s = String.format(Locale.JAPAN,"%02d",current_s);
+
+                    handler.post(new Runnable(){
+                        @Override
+                        public void run(){
+                            currenttime_t.setText(m + ":" + s);
+                            seekbar.setProgress(mp.getCurrentPosition());
+                        }
+                    });
+                }
+            }, 0, 1000);
+        }
     }
 
     public void stop(View v){
         mp.stop();
+        if(timer != null){
+            timer.cancel();
+            timer = null;
+        }
     }
 
     public void pause(View v){
         mp.pause();
+        if(timer != null){
+            timer.cancel();
+            timer = null;
+        }
     }
 
     @Override
